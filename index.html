@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Greek Quests Game - Advanced</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;700&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <h1>🏛️ Greek Quests Game 🏛️</h1>
+        
+        <!-- Difficulty Selection -->
+        <div id="difficulty-selection">
+            <h2>Select Difficulty</h2>
+            <div class="button-group">
+                <button class="difficulty-btn" id="difficulty-easy">Easy</button>
+                <button class="difficulty-btn" id="difficulty-medium">Medium</button>
+                <button class="difficulty-btn" id="difficulty-hard">Hard</button>
+            </div>
+            <p id="home-high-score"></p>
+        </div>
+        
+        <!-- Category Selection -->
+        <div id="category-selection" style="display: none;">
+            <h2>Select Historical Period</h2>
+            <div class="button-group">
+                <button class="category-btn" id="category-all">All Periods</button>
+                <button class="category-btn" id="category-rise">The Rise of Greece</button>
+                <button class="category-btn" id="category-golden">Golden Age</button>
+                <button class="category-btn" id="category-decline">Decline & Fall</button>
+            </div>
+        </div>
+        
+        <!-- Character Selection -->
+        <div id="character-selection" style="display: none;">
+            <h2>Choose Your Hero</h2>
+            <div class="character-grid">
+                <div class="character-card" id="character-odysseus">
+                    <h3>Odysseus</h3>
+                    <p>⚡ Cunning Wisdom</p>
+                    <p class="ability-desc">50% time bonus</p>
+                </div>
+                <div class="character-card" id="character-heracles">
+                    <h3>Heracles</h3>
+                    <p>💪 Divine Strength</p>
+                    <p class="ability-desc">Double points</p>
+                </div>
+                <div class="character-card" id="character-perseus">
+                    <h3>Perseus</h3>
+                    <p>⚔️ Quick Reflexes</p>
+                    <p class="ability-desc">+1 extra life</p>
+                </div>
+                <div class="character-card" id="character-athena">
+                    <h3>Athena</h3>
+                    <p>🧠 Goddess of Wisdom</p>
+                    <p class="ability-desc">+1 extra hint</p>
+                </div>
+                <div class="character-card" id="character-achilles">
+                    <h3>Achilles</h3>
+                    <p>🛡️ Warrior's Valor</p>
+                    <p class="ability-desc">Double streak bonuses</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quest Intro -->
+        <div id="quest-intro" style="display: none;">
+            <h2 id="storyline">Welcome, hero. Your quest begins!</h2>
+            <p id="character-ability"></p>
+            <button id="start-quest" class="primary-btn">Begin Quest</button>
+        </div>
+        
+        <!-- Game Stats -->
+        <div id="game-stats" style="display: none;">
+            <div class="stat-item">
+                <span id="score">Score: 0</span>
+            </div>
+            <div class="stat-item">
+                <span id="lives">Lives: ❤️❤️❤️</span>
+            </div>
+            <div class="stat-item">
+                <span id="streak">Streak: 0x</span>
+            </div>
+            <div class="stat-item">
+                <span id="level">Level 1 - Stage 1</span>
+            </div>
+            <div class="stat-item">
+                <span id="time-display">Time: 30s</span>
+            </div>
+        </div>
+        
+        <!-- Question Container -->
+        <div id="question-container" style="display: none;">
+            <p id="category" class="category-label"></p>
+            <p id="question" class="question-text">Loading question...</p>
+            <div id="answers" class="answers-grid">
+                <!-- Answer buttons will be generated here -->
+            </div>
+            <div id="feedback" class="feedback" style="display: none;"></div>
+        </div>
+        
+        <!-- Controls -->
+        <div id="controls" style="display: none;">
+            <h3>Power-Ups</h3>
+            <div class="power-ups">
+                <button id="power-hint" class="power-btn">Ask Athena (3)</button>
+                <button id="power-strike" class="power-btn">Zeus' Strike (2)</button>
+                <button id="power-timeFreeze" class="power-btn">Time Freeze (2)</button>
+                <button id="power-doublePoints" class="power-btn">Double Points (1)</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Over Screen -->
+    <div id="game-over" style="display: none;">
+        <div class="game-over-content">
+            <h2>🏺 Quest Complete! 🏺</h2>
+            <div class="final-stats">
+                <p>Final Score: <span id="final-score">0</span></p>
+                <p>Level Reached: <span id="final-level">1</span></p>
+                <p>High Score: <span id="high-score">0</span></p>
+            </div>
+            <button id="restart-game" class="primary-btn">Restart Quest</button>
+        </div>
+    </div>
+    
+    <script src="game.js"></script>
+</body>
+</html>
