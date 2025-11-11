@@ -205,6 +205,25 @@ function updateUI() {
     
     // Update power-up buttons
     updatePowerUpButtons();
+    
+    // Update progress bar
+    updateProgressBar();
+}
+
+// Update progress bar
+function updateProgressBar() {
+    const progressContainer = document.getElementById('progress-container');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    
+    if (!progressContainer || !progressFill || !progressText) return;
+    
+    // Calculate progress to next stage (every 5 questions)
+    const progressToNextStage = gameState.streak % 5;
+    const progressPercent = (progressToNextStage / 5) * 100;
+    
+    progressFill.style.width = `${progressPercent}%`;
+    progressText.textContent = `${progressToNextStage}/5`;
 }
 
 // Update power-up button states
@@ -507,6 +526,7 @@ function startQuest() {
     document.getElementById('quest-intro').style.display = 'none';
     document.getElementById('question-container').style.display = 'block';
     document.getElementById('game-stats').style.display = 'flex';
+    document.getElementById('progress-container').style.display = 'block';
     document.getElementById('controls').style.display = 'block';
     
     updateUI();
@@ -564,6 +584,7 @@ function restartGame() {
     document.getElementById('game-over').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
     document.getElementById('difficulty-selection').style.display = 'block';
+    document.getElementById('progress-container').style.display = 'none';
 }
 
 // Initialize
