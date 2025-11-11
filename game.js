@@ -35,7 +35,11 @@ const questionsDatabase = {
             { question: "What was the name of the early Greek alphabet derived from Phoenician script?", answers: ["Latin", "Linear B", "Greek alphabet", "Cyrillic"], correct: "Greek alphabet" },
             { question: "Which period marks the beginning of Classical Greece?", answers: ["Archaic Period", "Classical Period", "Hellenistic Period", "Mycenaean Period"], correct: "Archaic Period" },
             { question: "What were independent Greek city-states called?", answers: ["Poleis", "Colonies", "Kingdoms", "Republics"], correct: "Poleis" },
-            { question: "When did Greek colonization of the Mediterranean begin?", answers: ["800 BCE", "600 BCE", "400 BCE", "200 BCE"], correct: "800 BCE" }
+            { question: "When did Greek colonization of the Mediterranean begin?", answers: ["800 BCE", "600 BCE", "400 BCE", "200 BCE"], correct: "800 BCE" },
+            { question: "What was the Archaic Period?", answers: ["The Classical Period", "Transitional period between Dark Ages and Classical Period", "The Hellenistic Period", "The Mycenaean Period"], correct: "Transitional period between Dark Ages and Classical Period" },
+            { question: "Which city-states emerged as independent during the Archaic Period?", answers: ["Rome and Carthage", "Athens, Corinth, Sparta, and Thebes", "Alexandria and Antioch", "Troy and Mycenae"], correct: "Athens, Corinth, Sparta, and Thebes" },
+            { question: "What did each Greek city-state have?", answers: ["Shared government", "Its own army and government", "No government", "One unified army"], correct: "Its own army and government" },
+            { question: "Where did Greek settlements spread during the Archaic Period?", answers: ["Only in Greece", "Around the Mediterranean and Black Seas", "Only in Asia Minor", "Only in Italy"], correct: "Around the Mediterranean and Black Seas" }
         ],
         medium: [
             { question: "During what time period did the Minoan civilization exist?", answers: ["c. 3000–1450 BCE", "c. 1600–1100 BCE", "c. 800–500 BCE", "c. 500–300 BCE"], correct: "c. 3000–1450 BCE" },
@@ -50,7 +54,11 @@ const questionsDatabase = {
             { question: "Which Greek city was the first to develop democracy?", answers: ["Sparta", "Athens", "Thebes", "Corinth"], correct: "Athens" },
             { question: "Who introduced democratic reforms in Athens around 594 BCE?", answers: ["Pericles", "Solon", "Cleisthenes", "Draco"], correct: "Solon" },
             { question: "What event marked the end of the Archaic Period?", answers: ["The Persian Wars", "The Peloponnesian War", "Alexander's conquest", "Roman conquest"], correct: "The Persian Wars" },
-            { question: "Which tyrant ruled Athens before democracy was established?", answers: ["Pisistratus", "Pericles", "Socrates", "Plato"], correct: "Pisistratus" }
+            { question: "Which tyrant ruled Athens before democracy was established?", answers: ["Pisistratus", "Pericles", "Socrates", "Plato"], correct: "Pisistratus" },
+            { question: "What did the Archaic Period mark?", answers: ["The end of Greek civilization", "The rebirth of Greek Civilization", "The Roman conquest", "The fall of Athens"], correct: "The rebirth of Greek Civilization" },
+            { question: "What cultural developments occurred during the Archaic Period?", answers: ["Only warfare", "Temples, poetry, sculpture, and the Olympic Games", "Only trade", "Only politics"], correct: "Temples, poetry, sculpture, and the Olympic Games" },
+            { question: "What was the correct order of political evolution in Greek city-states?", answers: ["Democracies → Oligarchies → Monarchies → Tyrannies", "Monarchies → Oligarchies → Tyrannies → Democracies", "Oligarchies → Democracies → Tyrannies → Monarchies", "Tyrannies → Democracies → Monarchies → Oligarchies"], correct: "Monarchies → Oligarchies → Tyrannies → Democracies" },
+            { question: "What were tyrannies in ancient Greece?", answers: ["Rule by many", "Rule by wealthy elites", "Individual rulers who seized power, often supported by common citizens", "Rule by kings"], correct: "Individual rulers who seized power, often supported by common citizens" }
         ],
         hard: [
             { question: "What aspects were the Minoans particularly known for?", answers: ["Warfare and conquest", "Art, writing (Linear A), and a strong navy", "Philosophy and democracy", "Mathematics and science"], correct: "Art, writing (Linear A), and a strong navy" },
@@ -61,7 +69,11 @@ const questionsDatabase = {
             { question: "Which Greek reformer is credited with creating the Council of 500?", answers: ["Solon", "Cleisthenes", "Pericles", "Draco"], correct: "Cleisthenes" },
             { question: "What was the term for Greek citizens who participated in government?", answers: ["Polis", "Demos", "Hoplites", "Oligarchs"], correct: "Demos" },
             { question: "When did the Greek colonization of Sicily and Southern Italy peak?", answers: ["750-550 BCE", "600-400 BCE", "500-300 BCE", "400-200 BCE"], correct: "750-550 BCE" },
-            { question: "What was the name of the conflict between Athens and Sparta from 431-404 BCE?", answers: ["Persian Wars", "Peloponnesian War", "Corinthian War", "Sacred War"], correct: "Peloponnesian War" }
+            { question: "What was the name of the conflict between Athens and Sparta from 431-404 BCE?", answers: ["Persian Wars", "Peloponnesian War", "Corinthian War", "Sacred War"], correct: "Peloponnesian War" },
+            { question: "What were the key developments during the Archaic Period?", answers: ["Only military", "Major developments in politics, economy, arts, and culture", "Only economic", "Only cultural"], correct: "Major developments in politics, economy, arts, and culture" },
+            { question: "What characterized oligarchies in ancient Greece?", answers: ["Power held by all citizens", "Power held by wealthy elites or small groups of landowners", "Power held by kings", "Power held by tyrants"], correct: "Power held by wealthy elites or small groups of landowners" },
+            { question: "What characterized monarchies in ancient Greece?", answers: ["Power held by the people", "Power held by kings or hereditary leaders", "Power held by wealthy elites", "Power held by tyrants"], correct: "Power held by kings or hereditary leaders" },
+            { question: "How did Greek city-states expand their trade and influence during the Archaic Period?", answers: ["Through warfare only", "Through the spread of settlements", "Through diplomacy only", "Through conquest only"], correct: "Through the spread of settlements" }
         ]
     },
     golden: {
@@ -93,21 +105,29 @@ const questionsDatabase = {
             { question: "What battle gave Philip II control of Greece?", answers: ["Battle of Chaeronea", "Battle of Granicus", "Battle of Issus", "Battle of Gaugamela"], correct: "Battle of Chaeronea" },
             { question: "When did Alexander the Great die?", answers: ["323 BCE", "300 BCE", "280 BCE", "250 BCE"], correct: "323 BCE" },
             { question: "Which empire eventually conquered Greece?", answers: ["Persian Empire", "Roman Empire", "Byzantine Empire", "Ottoman Empire"], correct: "Roman Empire" },
-            { question: "What was the period called when Greek culture spread after Alexander's death?", answers: ["Classical Period", "Archaic Period", "Hellenistic Period", "Roman Period"], correct: "Hellenistic Period" }
+            { question: "What was the period called when Greek culture spread after Alexander's death?", answers: ["Classical Period", "Archaic Period", "Hellenistic Period", "Roman Period"], correct: "Hellenistic Period" },
+            { question: "What happened to Greek city-states after the Peloponnesian War?", answers: ["They united peacefully", "They continued to fight with desire for dominance", "They all disbanded", "They formed one empire"], correct: "They continued to fight with desire for dominance" },
+            { question: "Which city-states each had moments of control of Greece after the Peloponnesian War?", answers: ["Rome and Carthage", "Thebes, Athens, and Sparta", "Macedonia and Thrace", "Corinth and Argos"], correct: "Thebes, Athens, and Sparta" },
+            { question: "What did Greek city-states fail to do after the Peloponnesian War?", answers: ["Win battles", "Maintain unity", "Build cities", "Trade"], correct: "Maintain unity" }
         ],
         medium: [
             { question: "Which Roman general defeated the Greeks at the Battle of Pydna in 168 BCE?", answers: ["Julius Caesar", "Pompey", "Lucius Aemilius Paullus", "Scipio"], correct: "Lucius Aemilius Paullus" },
             { question: "What was the last major independent Greek city-state to fall to Rome?", answers: ["Athens", "Sparta", "Corinth", "Thebes"], correct: "Corinth" },
             { question: "In what year did Rome sack Corinth, effectively ending Greek independence?", answers: ["146 BCE", "133 BCE", "88 BCE", "30 BCE"], correct: "146 BCE" },
             { question: "What was the name of the alliance formed by Greek city-states to resist Macedonian rule?", answers: ["Achaean League", "Delian League", "Corinthian League", "Peloponnesian League"], correct: "Achaean League" },
-            { question: "Which Hellenistic kingdom was the last to fall to Rome in 30 BCE?", answers: ["Macedonia", "Seleucid Empire", "Ptolemaic Egypt", "Pergamon"], correct: "Ptolemaic Egypt" }
+            { question: "Which Hellenistic kingdom was the last to fall to Rome in 30 BCE?", answers: ["Macedonia", "Seleucid Empire", "Ptolemaic Egypt", "Pergamon"], correct: "Ptolemaic Egypt" },
+            { question: "What was drained from Greece due to constant warfare after the Peloponnesian War?", answers: ["Only money", "Only soldiers", "Trust and resources", "Only land"], correct: "Trust and resources" },
+            { question: "What was the result of Greek city-states' failure to maintain unity?", answers: ["They became stronger", "They were unable to defend themselves from outside forces", "They expanded their territory", "They formed new alliances"], correct: "They were unable to defend themselves from outside forces" },
+            { question: "What was the main desire of Greek city-states after the Peloponnesian War?", answers: ["Peace", "Trade", "Dominance", "Independence"], correct: "Dominance" }
         ],
         hard: [
             { question: "What was the name of the conflict between Rome and the Achaean League?", answers: ["Achaean War", "Macedonian Wars", "Social War", "Corinthian War"], correct: "Achaean War" },
             { question: "Which Roman province was Greece organized into?", answers: ["Achaea", "Macedonia", "Illyricum", "Thrace"], correct: "Achaea" },
             { question: "What was the cause of the economic decline in Greece during the Roman period?", answers: ["Famine", "War devastation", "Loss of trade routes", "All of the above"], correct: "All of the above" },
             { question: "Which emperor made Greece a province of Rome?", answers: ["Augustus", "Hadrian", "Marcus Aurelius", "Constantine"], correct: "Augustus" },
-            { question: "What event in 88 BCE saw Greek cities side with Mithridates against Rome?", answers: ["First Mithridatic War", "Social War", "Achaean War", "Spartan Revolt"], correct: "First Mithridatic War" }
+            { question: "What event in 88 BCE saw Greek cities side with Mithridates against Rome?", answers: ["First Mithridatic War", "Social War", "Achaean War", "Spartan Revolt"], correct: "First Mithridatic War" },
+            { question: "Why were Greek city-states vulnerable to outside forces after the Peloponnesian War?", answers: ["They had too many resources", "Trust and resources were drained, leaving them unable to defend themselves", "They had no armies", "They were too peaceful"], correct: "Trust and resources were drained, leaving them unable to defend themselves" },
+            { question: "What characterized the period of constant warfare among Greek city-states?", answers: ["Unity and cooperation", "Each city-state seeking dominance and failing to maintain unity", "Peaceful trade", "Shared government"], correct: "Each city-state seeking dominance and failing to maintain unity" }
         ]
     }
 };
