@@ -17,8 +17,150 @@ let gameState = {
         timeFreeze: { uses: 2, cooldown: 0 },
         doublePoints: { uses: 1, active: false }
     },
-    answeredQuestions: new Set()
+    answeredQuestions: new Set(),
+    totalCorrectAnswers: parseInt(localStorage.getItem('totalCorrectAnswers') || '0'),
+    achievementsUnlocked: new Set()
 };
+
+// Achievement system
+const achievements = {
+    firstAnswer: {
+        id: 'firstAnswer',
+        title: 'First Steps',
+        description: 'Answered your first question correctly!',
+        icon: '🎯',
+        check: () => gameState.totalCorrectAnswers >= 1
+    },
+    tenAnswers: {
+        id: 'tenAnswers',
+        title: 'Scholar',
+        description: 'Answered 10 questions correctly!',
+        icon: '📚',
+        check: () => gameState.totalCorrectAnswers >= 10
+    },
+    twentyFiveAnswers: {
+        id: 'twentyFiveAnswers',
+        title: 'Historian',
+        description: 'Answered 25 questions correctly!',
+        icon: '🏛️',
+        check: () => gameState.totalCorrectAnswers >= 25
+    },
+    fiftyAnswers: {
+        id: 'fiftyAnswers',
+        title: 'Master Historian',
+        description: 'Answered 50 questions correctly!',
+        icon: '👑',
+        check: () => gameState.totalCorrectAnswers >= 50
+    },
+    perfectStreak5: {
+        id: 'perfectStreak5',
+        title: 'On Fire!',
+        description: 'Achieved a 5-question streak!',
+        icon: '🔥',
+        check: () => gameState.streak >= 5 && gameState.streak % 5 === 0
+    },
+    perfectStreak10: {
+        id: 'perfectStreak10',
+        title: 'Unstoppable!',
+        description: 'Achieved a 10-question streak!',
+        icon: '⚡',
+        check: () => gameState.streak >= 10 && gameState.streak % 10 === 0
+    },
+    level3: {
+        id: 'level3',
+        title: 'Rising Star',
+        description: 'Reached Level 3!',
+        icon: '⭐',
+        check: () => gameState.level >= 3
+    },
+    level5: {
+        id: 'level5',
+        title: 'Legend',
+        description: 'Reached Level 5!',
+        icon: '🌟',
+        check: () => gameState.level >= 5
+    },
+    highScore1000: {
+        id: 'highScore1000',
+        title: 'High Achiever',
+        description: 'Scored over 1,000 points!',
+        icon: '💯',
+        check: () => gameState.score >= 1000
+    },
+    highScore5000: {
+        id: 'highScore5000',
+        title: 'Elite Player',
+        description: 'Scored over 5,000 points!',
+        icon: '💎',
+        check: () => gameState.score >= 5000
+    },
+    allPowerUpsUsed: {
+        id: 'allPowerUpsUsed',
+        title: 'Strategic Master',
+        description: 'Used all power-up types in one game!',
+        icon: '🎲',
+        check: () => {
+            const used = JSON.parse(localStorage.getItem('powerUpsUsed') || '{}');
+            return used.hint && used.strike && used.timeFreeze && used.doublePoints;
+        }
+    }
+};
+
+// Load achievements from localStorage
+function loadAchievements() {
+    const saved = localStorage.getItem('achievements');
+    if (saved) {
+        gameState.achievementsUnlocked = new Set(JSON.parse(saved));
+    }
+}
+
+// Save achievements to localStorage
+function saveAchievements() {
+    localStorage.setItem('achievements', JSON.stringify([...gameState.achievementsUnlocked]));
+}
+
+// Check and unlock achievements
+function checkAchievements() {
+    Object.values(achievements).forEach(achievement => {
+        if (!gameState.achievementsUnlocked.has(achievement.id) && achievement.check()) {
+            unlockAchievement(achievement);
+        }
+    });
+}
+
+// Unlock and display achievement
+function unlockAchievement(achievement) {
+    gameState.achievementsUnlocked.add(achievement.id);
+    saveAchievements();
+    
+    const popup = document.getElementById('achievement-popup');
+    const icon = popup.querySelector('.achievement-icon');
+    const title = document.getElementById('achievement-title');
+    const description = document.getElementById('achievement-description');
+    
+    icon.textContent = achievement.icon;
+    title.textContent = achievement.title;
+    description.textContent = achievement.description;
+    
+    popup.style.display = 'block';
+    popup.classList.add('show');
+    
+    // Hide after 4 seconds
+    setTimeout(() => {
+        popup.classList.remove('show');
+        setTimeout(() => {
+            popup.style.display = 'none';
+        }, 500);
+    }, 4000);
+}
+
+// Track power-up usage
+function trackPowerUpUsage(powerName) {
+    const used = JSON.parse(localStorage.getItem('powerUpsUsed') || '{}');
+    used[powerName] = true;
+    localStorage.setItem('powerUpsUsed', JSON.stringify(used));
+    checkAchievements();
+}
 
 // Extensive question database with categories and difficulties - Historical Facts about Ancient Greece
 const questionsDatabase = {
@@ -309,6 +451,7 @@ function loadQuestion() {
         gameState.answeredQuestions.clear();
         gameState.difficulty = gameState.level > 3 ? 'hard' : gameState.level > 1 ? 'medium' : 'easy';
         showFeedback(`Level ${gameState.level} reached!`, true);
+        checkAchievements(); // Check level-based achievements
     }
     
     const questionsAvailable = getQuestions();
@@ -368,6 +511,8 @@ function checkAnswer(selectedAnswer, buttonElement) {
     
     if (isCorrect) {
         gameState.streak++;
+        gameState.totalCorrectAnswers++;
+        localStorage.setItem('totalCorrectAnswers', gameState.totalCorrectAnswers.toString());
         gameState.answeredQuestions.add(gameState.currentQuestion.question);
         
         let points = 100 + (gameState.level * 50) + (gameState.streak * 10);
@@ -396,6 +541,9 @@ function checkAnswer(selectedAnswer, buttonElement) {
             gameState.stage++;
             showFeedback(`Stage ${gameState.stage} reached!`, true);
         }
+        
+        // Check achievements
+        checkAchievements();
         
         showFeedback(`+${Math.floor(points)} points!`, true);
         setTimeout(() => loadQuestion(), 1500);
@@ -445,6 +593,7 @@ function useHint() {
     
     gameState.powerUps.hint.cooldown = 3;
     startCooldown('hint');
+    trackPowerUpUsage('hint');
     updateUI();
 }
 
@@ -462,6 +611,7 @@ function useStrike() {
     
     gameState.powerUps.strike.cooldown = 5;
     startCooldown('strike');
+    trackPowerUpUsage('strike');
     updateUI();
 }
 
@@ -472,6 +622,7 @@ function useTimeFreeze() {
     gameState.timeRemaining += 15;
     gameState.powerUps.timeFreeze.cooldown = 4;
     startCooldown('timeFreeze');
+    trackPowerUpUsage('timeFreeze');
     updateUI();
 }
 
@@ -480,6 +631,7 @@ function useDoublePoints() {
     
     gameState.powerUps.doublePoints.active = true;
     gameState.powerUps.doublePoints.uses--;
+    trackPowerUpUsage('doublePoints');
     updateUI();
     showFeedback("Double Points activated for next answer!", true);
 }
@@ -560,6 +712,9 @@ function selectCategory(category) {
 
 // Restart game
 function restartGame() {
+    // Reset power-up usage tracking for new game
+    localStorage.setItem('powerUpsUsed', JSON.stringify({}));
+    
     gameState = {
         score: 0,
         lives: 3,
@@ -578,8 +733,13 @@ function restartGame() {
             timeFreeze: { uses: 2, cooldown: 0 },
             doublePoints: { uses: 1, active: false }
         },
-        answeredQuestions: new Set()
+        answeredQuestions: new Set(),
+        totalCorrectAnswers: parseInt(localStorage.getItem('totalCorrectAnswers') || '0'),
+        achievementsUnlocked: new Set()
     };
+    
+    // Reload achievements (persistent across games)
+    loadAchievements();
     
     document.getElementById('game-over').style.display = 'none';
     document.getElementById('game-container').style.display = 'block';
@@ -589,6 +749,9 @@ function restartGame() {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Load achievements on page load
+    loadAchievements();
+    
     // Character selection
     Object.keys(characterAbilities).forEach(char => {
         const btn = document.getElementById(`character-${char.toLowerCase()}`);

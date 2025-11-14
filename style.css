@@ -403,6 +403,76 @@ button:disabled {
     color: white;
 }
 
+/* Achievement Popup Styles */
+.achievement-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.achievement-popup.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    pointer-events: auto;
+}
+
+.achievement-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 30px 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    min-width: 300px;
+    animation: achievementBounce 0.5s ease;
+}
+
+@keyframes achievementBounce {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.achievement-icon {
+    font-size: 4em;
+    margin-bottom: 15px;
+    animation: iconSpin 0.6s ease;
+}
+
+@keyframes iconSpin {
+    0% {
+        transform: rotate(-180deg) scale(0);
+    }
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+}
+
+.achievement-content h3 {
+    color: white;
+    font-size: 1.8em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.achievement-content p {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.1em;
+    margin: 0;
+}
+
 .power-ups {
     display: flex;
     flex-wrap: wrap;
