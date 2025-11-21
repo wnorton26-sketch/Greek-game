@@ -1,28 +1,48 @@
-// Game state
+/**
+ * ============================================
+ * GAME STATE MANAGEMENT
+ * ============================================
+ * Centralized state object that tracks all game data.
+ * Uses JavaScript Set for efficient duplicate question tracking (O(1) lookup).
+ * Integrates with localStorage for persistent data across sessions.
+ */
 let gameState = {
-    score: 0,
-    lives: 3,
-    streak: 0,
-    level: 1,
-    stage: 1,
-    currentQuestionIndex: 0,
-    selectedCharacter: null,
-    difficulty: 'medium',
-    category: 'all',
-    timeRemaining: 30,
-    timerInterval: null,
-    powerUps: {
-        hint: { uses: 3, cooldown: 0 },
-        strike: { uses: 2, cooldown: 0 },
-        timeFreeze: { uses: 2, cooldown: 0 },
-        doublePoints: { uses: 1, active: false }
+    score: 0,                          // Current player score
+    lives: 3,                          // Number of lives remaining
+    streak: 0,                         // Consecutive correct answers
+    level: 1,                          // Current difficulty level
+    stage: 1,                          // Current stage (advances every 5 questions)
+    currentQuestionIndex: 0,           // Index of current question
+    selectedCharacter: null,           // Character chosen by player
+    difficulty: 'medium',              // Difficulty level: 'easy', 'medium', or 'hard'
+    category: 'all',                   // Question category: 'all', 'rise', 'golden', or 'decline'
+    timeRemaining: 30,                 // Time left to answer current question (seconds)
+    timerInterval: null,               // Reference to setInterval for timer countdown
+    powerUps: {                        // Power-up system with uses and cooldowns
+        hint: { uses: 3, cooldown: 0 },        // Eliminates 50% of wrong answers
+        strike: { uses: 2, cooldown: 0 },      // Eliminates all wrong answers
+        timeFreeze: { uses: 2, cooldown: 0 }, // Adds 15 seconds to timer
+        doublePoints: { uses: 1, active: false } // Doubles points for next answer
     },
-    answeredQuestions: new Set(),
-    totalCorrectAnswers: parseInt(localStorage.getItem('totalCorrectAnswers') || '0'),
-    achievementsUnlocked: new Set()
+    answeredQuestions: new Set(),      // Set of answered questions (prevents duplicates)
+    totalCorrectAnswers: parseInt(localStorage.getItem('totalCorrectAnswers') || '0'), // Lifetime total
+    achievementsUnlocked: new Set()    // Set of unlocked achievement IDs
 };
 
-// Achievement system
+/**
+ * ============================================
+ * ACHIEVEMENT SYSTEM
+ * ============================================
+ * Defines all achievements with their conditions.
+ * Each achievement has:
+ * - id: Unique identifier
+ * - title: Display name
+ * - description: What the achievement is for
+ * - icon: Emoji icon
+ * - check: Function that returns true when achievement should unlock
+ * 
+ * Uses functional programming pattern - each achievement defines its own check function.
+ */
 const achievements = {
     firstAnswer: {
         id: 'firstAnswer',
@@ -106,7 +126,10 @@ const achievements = {
     }
 };
 
-// Load achievements from localStorage
+/**
+ * Load achievements from localStorage
+ * Converts JSON array back to Set data structure for efficient lookups
+ */
 function loadAchievements() {
     const saved = localStorage.getItem('achievements');
     if (saved) {
@@ -114,12 +137,19 @@ function loadAchievements() {
     }
 }
 
-// Save achievements to localStorage
+/**
+ * Save achievements to localStorage
+ * Converts Set to array using spread operator for JSON serialization
+ */
 function saveAchievements() {
     localStorage.setItem('achievements', JSON.stringify([...gameState.achievementsUnlocked]));
 }
 
-// Check and unlock achievements
+/**
+ * Check and unlock achievements
+ * Iterates through all achievements and checks if conditions are met
+ * Only unlocks if not already unlocked (prevents duplicate notifications)
+ */
 function checkAchievements() {
     Object.values(achievements).forEach(achievement => {
         if (!gameState.achievementsUnlocked.has(achievement.id) && achievement.check()) {
@@ -128,7 +158,11 @@ function checkAchievements() {
     });
 }
 
-// Unlock and display achievement
+/**
+ * Unlock and display achievement popup
+ * Updates state, saves to localStorage, and shows animated popup notification
+ * @param {Object} achievement - The achievement object to unlock
+ */
 function unlockAchievement(achievement) {
     gameState.achievementsUnlocked.add(achievement.id);
     saveAchievements();
@@ -154,15 +188,31 @@ function unlockAchievement(achievement) {
     }, 4000);
 }
 
-// Track power-up usage
+/**
+ * Track power-up usage for achievement system
+ * Stores which power-ups have been used in current game session
+ * Used to unlock "Strategic Master" achievement (all power-ups used)
+ * @param {string} powerName - Name of the power-up that was used
+ */
 function trackPowerUpUsage(powerName) {
     const used = JSON.parse(localStorage.getItem('powerUpsUsed') || '{}');
     used[powerName] = true;
     localStorage.setItem('powerUpsUsed', JSON.stringify(used));
-    checkAchievements();
+    checkAchievements(); // Check if "all power-ups used" achievement should unlock
 }
 
-// Extensive question database with categories and difficulties - Historical Facts about Ancient Greece
+/**
+ * ============================================
+ * QUESTION DATABASE
+ * ============================================
+ * Organized by category (rise, golden, decline) and difficulty (easy, medium, hard)
+ * Each question object contains:
+ * - question: The question text
+ * - answers: Array of 4 possible answers
+ * - correct: The correct answer string
+ * 
+ * Total: 70+ historical questions about Ancient Greece
+ */
 const questionsDatabase = {
     rise: {
         easy: [
@@ -274,7 +324,18 @@ const questionsDatabase = {
     }
 };
 
-// Character abilities
+/**
+ * ============================================
+ * CHARACTER ABILITIES SYSTEM
+ * ============================================
+ * Defines unique abilities for each playable character.
+ * Each character modifies gameplay in different ways:
+ * - Odysseus: Time bonus (50% more time)
+ * - Heracles: Double points multiplier
+ * - Perseus: Extra life at start
+ * - Athena: Extra hint use
+ * - Achilles: Double streak bonuses
+ */
 const characterAbilities = {
     Odysseus: {
         name: "Odysseus",
@@ -308,19 +369,27 @@ const characterAbilities = {
     }
 };
 
-// Get questions based on category and difficulty
+/**
+ * Get available questions based on category and difficulty
+ * Filters out already-answered questions using Set (O(1) lookup)
+ * Uses Fisher-Yates shuffle algorithm for true randomization
+ * @returns {Array} Array of question objects with category property added
+ */
 function getQuestions() {
     let availableQuestions = [];
     
+    // If "all" categories selected, combine questions from all categories
     if (gameState.category === 'all') {
         Object.keys(questionsDatabase).forEach(cat => {
             questionsDatabase[cat][gameState.difficulty].forEach(q => {
+                // Use Set.has() for O(1) duplicate checking
                 if (!gameState.answeredQuestions.has(q.question)) {
                     availableQuestions.push({ ...q, category: cat });
                 }
             });
         });
     } else {
+        // Single category selected
         questionsDatabase[gameState.category][gameState.difficulty].forEach(q => {
             if (!gameState.answeredQuestions.has(q.question)) {
                 availableQuestions.push({ ...q, category: gameState.category });
@@ -328,16 +397,26 @@ function getQuestions() {
         });
     }
     
-    // Shuffle questions
+    /**
+     * Fisher-Yates Shuffle Algorithm
+     * More efficient than sorting with Math.random()
+     * Time complexity: O(n), Space complexity: O(1)
+     * Ensures true random distribution
+     */
     for (let i = availableQuestions.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
+        // Swap elements using destructuring
         [availableQuestions[i], availableQuestions[j]] = [availableQuestions[j], availableQuestions[i]];
     }
     
     return availableQuestions;
 }
 
-// Update UI
+/**
+ * Update all UI elements with current game state
+ * Called after any state change to keep UI synchronized
+ * Updates: score, lives, streak, level/stage, timer, power-ups, progress bar
+ */
 function updateUI() {
     document.getElementById('score').textContent = `Score: ${gameState.score}`;
     document.getElementById('lives').textContent = `Lives: ${'❤️'.repeat(gameState.lives)}`;
@@ -352,7 +431,11 @@ function updateUI() {
     updateProgressBar();
 }
 
-// Update progress bar
+/**
+ * Update progress bar to show advancement toward next stage
+ * Progress resets every 5 questions (when stage advances)
+ * Calculates percentage and updates visual fill bar
+ */
 function updateProgressBar() {
     const progressContainer = document.getElementById('progress-container');
     const progressFill = document.getElementById('progress-fill');
@@ -368,7 +451,11 @@ function updateProgressBar() {
     progressText.textContent = `${progressToNextStage}/5`;
 }
 
-// Update power-up button states
+/**
+ * Update power-up button states and display
+ * Shows remaining uses and cooldown timers
+ * Disables buttons when uses are depleted or on cooldown
+ */
 function updatePowerUpButtons() {
     ['hint', 'strike', 'timeFreeze'].forEach(power => {
         const btn = document.getElementById(`power-${power}`);
@@ -392,16 +479,27 @@ function updatePowerUpButtons() {
     }
 }
 
-// Start timer
+/**
+ * Start countdown timer for current question
+ * Timer decreases by 2 seconds per level (progressive difficulty)
+ * Minimum time is 15 seconds
+ * Character abilities can modify timer (e.g., Odysseus gets 50% bonus)
+ * Uses setInterval for asynchronous countdown
+ */
 function startTimer() {
+    // Clear any existing timer to prevent multiple intervals
     clearInterval(gameState.timerInterval);
-    const baseTime = 30 - (gameState.level - 1) * 2;
-    gameState.timeRemaining = Math.max(15, baseTime);
     
+    // Calculate base time: decreases by 2 seconds per level
+    const baseTime = 30 - (gameState.level - 1) * 2;
+    gameState.timeRemaining = Math.max(15, baseTime); // Minimum 15 seconds
+    
+    // Apply character time bonus if applicable
     if (gameState.selectedCharacter && characterAbilities[gameState.selectedCharacter].bonus.time) {
         gameState.timeRemaining = Math.floor(gameState.timeRemaining * characterAbilities[gameState.selectedCharacter].bonus.time);
     }
     
+    // Reset visual warning state
     const timeDisplay = document.getElementById('time-display');
     if (timeDisplay) {
         timeDisplay.classList.remove('time-warning');
@@ -409,10 +507,12 @@ function startTimer() {
     
     updateUI();
     
+    // Set up interval to count down every second
     gameState.timerInterval = setInterval(() => {
         gameState.timeRemaining--;
         updateUI();
         
+        // Add visual warning when time is low (5 seconds or less)
         const timeDisplay = document.getElementById('time-display');
         if (gameState.timeRemaining <= 5) {
             timeDisplay.classList.add('time-warning');
@@ -420,13 +520,18 @@ function startTimer() {
             timeDisplay.classList.remove('time-warning');
         }
         
+        // Handle time running out
         if (gameState.timeRemaining <= 0) {
             timeUp();
         }
-    }, 1000);
+    }, 1000); // Update every 1000ms (1 second)
 }
 
-// Time's up
+/**
+ * Handle timer expiration
+ * Player loses a life and streak resets
+ * Game ends if no lives remaining
+ */
 function timeUp() {
     clearInterval(gameState.timerInterval);
     gameState.lives--;
@@ -440,48 +545,60 @@ function timeUp() {
     }
 }
 
-// Load question
+/**
+ * Load and display a new question
+ * Handles level progression when all questions are answered
+ * Randomly selects from available questions
+ * Shuffles answer order to prevent pattern recognition
+ * Dynamically creates answer buttons
+ */
 function loadQuestion() {
     const questions = getQuestions();
     
+    // If no questions available, advance to next level
     if (questions.length === 0) {
-        // All questions answered, advance level
         gameState.level++;
         gameState.stage++;
-        gameState.answeredQuestions.clear();
+        gameState.answeredQuestions.clear(); // Reset answered questions for new level
+        // Increase difficulty based on level
         gameState.difficulty = gameState.level > 3 ? 'hard' : gameState.level > 1 ? 'medium' : 'easy';
         showFeedback(`Level ${gameState.level} reached!`, true);
         checkAchievements(); // Check level-based achievements
     }
     
+    // Get questions again after potential level advancement
     const questionsAvailable = getQuestions();
     if (questionsAvailable.length === 0) {
-        endGame();
+        endGame(); // No more questions available
         return;
     }
     
+    // Randomly select a question from available pool
     const randomIndex = Math.floor(Math.random() * questionsAvailable.length);
     const currentQuestion = questionsAvailable[randomIndex];
     gameState.currentQuestion = currentQuestion;
     
+    // Get DOM elements
     const questionElement = document.getElementById('question');
     const answersElement = document.getElementById('answers');
     const categoryElement = document.getElementById('category');
     
-    // Category display names
+    // Map category codes to display names
     const categoryNames = {
         'rise': 'The Rise of Greece',
         'golden': 'Golden Age',
         'decline': 'Decline & Fall'
     };
     
+    // Display question and category
     questionElement.textContent = currentQuestion.question;
     categoryElement.textContent = `Period: ${categoryNames[currentQuestion.category] || currentQuestion.category}`;
-    answersElement.innerHTML = '';
+    answersElement.innerHTML = ''; // Clear previous answers
     
-    // Shuffle answers
+    // Shuffle answers to randomize position (prevents memorizing positions)
     const shuffledAnswers = [...currentQuestion.answers].sort(() => Math.random() - 0.5);
     
+    // Create answer buttons dynamically
     shuffledAnswers.forEach(answer => {
         const button = document.createElement('button');
         button.className = 'answer-btn';
@@ -490,91 +607,138 @@ function loadQuestion() {
         answersElement.appendChild(button);
     });
     
-    startTimer();
+    startTimer(); // Start countdown timer
 }
 
-// Check answer
+/**
+ * Check if selected answer is correct and handle scoring
+ * Implements dynamic scoring system with multiple multipliers
+ * Formula: Base Points + Level Bonus + Streak Bonus + Time Bonus + Character Multipliers + Power-up Multipliers
+ * 
+ * @param {string} selectedAnswer - The answer selected by the player
+ * @param {HTMLElement} buttonElement - The button element that was clicked
+ */
 function checkAnswer(selectedAnswer, buttonElement) {
+    // Stop timer when answer is selected
     clearInterval(gameState.timerInterval);
     
+    // Check if answer is correct
     const isCorrect = selectedAnswer === gameState.currentQuestion.correct;
     const allButtons = document.querySelectorAll('.answer-btn');
     
+    // Disable all buttons and add visual feedback
     allButtons.forEach(btn => {
         btn.disabled = true;
         if (btn.textContent === gameState.currentQuestion.correct) {
-            btn.classList.add('correct');
+            btn.classList.add('correct'); // Highlight correct answer in green
         } else if (btn === buttonElement && !isCorrect) {
-            btn.classList.add('wrong');
+            btn.classList.add('wrong'); // Highlight wrong selection in red
         }
     });
     
     if (isCorrect) {
+        // CORRECT ANSWER HANDLING
         gameState.streak++;
         gameState.totalCorrectAnswers++;
+        // Save total to localStorage for persistent tracking
         localStorage.setItem('totalCorrectAnswers', gameState.totalCorrectAnswers.toString());
+        // Add question to Set to prevent duplicates
         gameState.answeredQuestions.add(gameState.currentQuestion.question);
         
+        /**
+         * DYNAMIC SCORING CALCULATION
+         * Base: 100 points
+         * Level bonus: +50 per level (encourages progression)
+         * Streak bonus: +10 per consecutive correct answer (encourages consistency)
+         * Time bonus: +50 if answered quickly (encourages speed)
+         */
         let points = 100 + (gameState.level * 50) + (gameState.streak * 10);
         if (gameState.timeRemaining > 20) points += 50;
         
-        // Character bonus
+        // Character ability multipliers (e.g., Heracles doubles all points)
         if (gameState.selectedCharacter && characterAbilities[gameState.selectedCharacter].bonus.points) {
             points *= characterAbilities[gameState.selectedCharacter].bonus.points;
         }
         
-        // Double points power-up
+        // Double points power-up multiplier
         if (gameState.powerUps.doublePoints.active) {
             points *= 2;
-            gameState.powerUps.doublePoints.active = false;
+            gameState.powerUps.doublePoints.active = false; // Deactivate after use
         }
         
-        // Streak bonus
+        // Special character streak bonus (Achilles gets extra points per streak)
         if (gameState.selectedCharacter === 'Achilles' && characterAbilities['Achilles'].bonus.streak) {
             points += gameState.streak * 20;
         }
         
+        // Add points to total score
         gameState.score += Math.floor(points);
         
-        // Advance stage every 5 questions
+        // Advance stage every 5 consecutive correct answers
         if (gameState.streak % 5 === 0) {
             gameState.stage++;
             showFeedback(`Stage ${gameState.stage} reached!`, true);
         }
         
-        // Check achievements
+        // Check for achievement unlocks
         checkAchievements();
         
+        // Show positive feedback and load next question after delay
         showFeedback(`+${Math.floor(points)} points!`, true);
         setTimeout(() => loadQuestion(), 1500);
     } else {
+        // WRONG ANSWER HANDLING
         gameState.lives--;
-        gameState.streak = 0;
+        gameState.streak = 0; // Reset streak on wrong answer
+        
         showFeedback("Wrong answer! You lost a life.", false);
         
+        // Check if game should end
         if (gameState.lives <= 0) {
             setTimeout(() => endGame(), 2000);
         } else {
+            // Continue with next question after delay
             setTimeout(() => loadQuestion(), 2000);
         }
     }
     
+    // Update UI with new state
     updateUI();
 }
 
-// Show feedback
+/**
+ * Display feedback message to player
+ * Shows success (green) or error (red) messages
+ * Auto-hides after 2 seconds
+ * 
+ * @param {string} message - The message to display
+ * @param {boolean} isSuccess - True for success styling, false for error styling
+ */
 function showFeedback(message, isSuccess) {
     const feedback = document.getElementById('feedback');
     feedback.textContent = message;
     feedback.className = isSuccess ? 'feedback success' : 'feedback error';
     feedback.style.display = 'block';
     
+    // Auto-hide after 2 seconds
     setTimeout(() => {
         feedback.style.display = 'none';
     }, 2000);
 }
 
-// Power-ups
+/**
+ * ============================================
+ * POWER-UP FUNCTIONS
+ * ============================================
+ * Each power-up has limited uses and cooldown periods
+ * Tracks usage for achievement system
+ */
+
+/**
+ * Use Hint power-up
+ * Eliminates 50% of wrong answers (rounded down)
+ * Has 3 uses and 3-second cooldown
+ */
 function useHint() {
     if (gameState.powerUps.hint.uses <= 0 || gameState.powerUps.hint.cooldown > 0) return;
     
@@ -597,6 +761,11 @@ function useHint() {
     updateUI();
 }
 
+/**
+ * Use Zeus' Strike power-up
+ * Eliminates ALL wrong answers (leaves only correct answer visible)
+ * Has 2 uses and 5-second cooldown
+ */
 function useStrike() {
     if (gameState.powerUps.strike.uses <= 0 || gameState.powerUps.strike.cooldown > 0) return;
     
@@ -615,6 +784,11 @@ function useStrike() {
     updateUI();
 }
 
+/**
+ * Use Time Freeze power-up
+ * Adds 15 seconds to the current timer
+ * Has 2 uses and 4-second cooldown
+ */
 function useTimeFreeze() {
     if (gameState.powerUps.timeFreeze.uses <= 0 || gameState.powerUps.timeFreeze.cooldown > 0) return;
     
@@ -626,6 +800,12 @@ function useTimeFreeze() {
     updateUI();
 }
 
+/**
+ * Use Double Points power-up
+ * Doubles points for the next correct answer
+ * Has 1 use and activates immediately (no cooldown)
+ * Deactivates automatically after use
+ */
 function useDoublePoints() {
     if (gameState.powerUps.doublePoints.uses <= 0 || gameState.powerUps.doublePoints.active) return;
     
@@ -636,6 +816,13 @@ function useDoublePoints() {
     showFeedback("Double Points activated for next answer!", true);
 }
 
+/**
+ * Start cooldown timer for a power-up
+ * Uses setInterval to count down cooldown every second
+ * Automatically clears interval when cooldown reaches 0
+ * 
+ * @param {string} power - Name of the power-up (hint, strike, timeFreeze)
+ */
 function startCooldown(power) {
     const interval = setInterval(() => {
         gameState.powerUps[power].cooldown--;
@@ -647,17 +834,22 @@ function startCooldown(power) {
     }, 1000);
 }
 
-// End game
+/**
+ * End game and display final results
+ * Saves high score to localStorage if new record
+ * Shows game over screen with final statistics
+ */
 function endGame() {
-    clearInterval(gameState.timerInterval);
+    clearInterval(gameState.timerInterval); // Stop timer
     
-    // Save high score
+    // Check and save high score
     const highScore = localStorage.getItem('greekGameHighScore') || 0;
     if (gameState.score > highScore) {
         localStorage.setItem('greekGameHighScore', gameState.score);
         localStorage.setItem('greekGameHighScoreLevel', gameState.level);
     }
     
+    // Hide game container and show game over screen
     document.getElementById('game-container').style.display = 'none';
     document.getElementById('game-over').style.display = 'block';
     document.getElementById('final-score').textContent = gameState.score;
@@ -665,7 +857,11 @@ function endGame() {
     document.getElementById('high-score').textContent = Math.max(gameState.score, highScore);
 }
 
-// Start game
+/**
+ * Start the game quest
+ * Applies character bonuses (extra lives, hints)
+ * Shows game interface and loads first question
+ */
 function startQuest() {
     // Apply character bonuses
     if (gameState.selectedCharacter === 'Perseus') {
@@ -685,7 +881,12 @@ function startQuest() {
     loadQuestion();
 }
 
-// Select character
+/**
+ * Handle character selection
+ * Updates game state and displays character information
+ * 
+ * @param {string} character - Character name (Odysseus, Heracles, etc.)
+ */
 function selectCharacter(character) {
     gameState.selectedCharacter = character;
     document.getElementById('character-selection').style.display = 'none';
@@ -696,21 +897,36 @@ function selectCharacter(character) {
         `Ability: ${characterAbilities[character].ability}`;
 }
 
-// Select difficulty
+/**
+ * Handle difficulty selection
+ * Updates game state and shows category selection screen
+ * 
+ * @param {string} difficulty - 'easy', 'medium', or 'hard'
+ */
 function selectDifficulty(difficulty) {
     gameState.difficulty = difficulty;
     document.getElementById('difficulty-selection').style.display = 'none';
     document.getElementById('category-selection').style.display = 'block';
 }
 
-// Select category
+/**
+ * Handle category selection
+ * Updates game state and shows character selection screen
+ * 
+ * @param {string} category - 'all', 'rise', 'golden', or 'decline'
+ */
 function selectCategory(category) {
     gameState.category = category;
     document.getElementById('category-selection').style.display = 'none';
     document.getElementById('character-selection').style.display = 'block';
 }
 
-// Restart game
+/**
+ * Restart game and reset all state
+ * Resets game state to initial values
+ * Preserves achievements and total correct answers (persistent data)
+ * Resets power-up usage tracking for new game session
+ */
 function restartGame() {
     // Reset power-up usage tracking for new game
     localStorage.setItem('powerUpsUsed', JSON.stringify({}));
@@ -747,12 +963,19 @@ function restartGame() {
     document.getElementById('progress-container').style.display = 'none';
 }
 
-// Initialize
+/**
+ * ============================================
+ * INITIALIZATION
+ * ============================================
+ * Sets up event listeners when DOM is fully loaded
+ * Loads persistent data (achievements, high scores)
+ * Binds all interactive elements to their functions
+ */
 document.addEventListener('DOMContentLoaded', () => {
-    // Load achievements on page load
+    // Load achievements from localStorage on page load
     loadAchievements();
     
-    // Character selection
+    // Set up character selection buttons dynamically
     Object.keys(characterAbilities).forEach(char => {
         const btn = document.getElementById(`character-${char.toLowerCase()}`);
         if (btn) {
@@ -760,7 +983,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Difficulty selection
+    // Set up difficulty selection buttons
     ['easy', 'medium', 'hard'].forEach(diff => {
         const btn = document.getElementById(`difficulty-${diff}`);
         if (btn) {
@@ -768,7 +991,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Category selection
+    // Set up category selection buttons
     ['all', 'rise', 'golden', 'decline'].forEach(cat => {
         const btn = document.getElementById(`category-${cat}`);
         if (btn) {
@@ -776,10 +999,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // Start quest button
+    // Main game start button
     document.getElementById('start-quest').onclick = startQuest;
     
-    // Power-up buttons
+    // Power-up button event listeners
     document.getElementById('power-hint').onclick = useHint;
     document.getElementById('power-strike').onclick = useStrike;
     document.getElementById('power-timeFreeze').onclick = useTimeFreeze;
@@ -788,7 +1011,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Restart button
     document.getElementById('restart-game').onclick = restartGame;
     
-    // Show high score
+    // Display high score on home screen if available
     const highScore = localStorage.getItem('greekGameHighScore') || 0;
     if (highScore > 0) {
         document.getElementById('home-high-score').textContent = `High Score: ${highScore}`;

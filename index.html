@@ -4,14 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Greek Quests Game - Advanced</title>
+    
+    <!-- External Stylesheet -->
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Google Fonts: Jura (body) and Cinzel (headings) -->
     <link href="https://fonts.googleapis.com/css2?family=Jura:wght@400;700&family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Main Game Container -->
     <div id="game-container">
         <h1>🏛️ Greek Quests Game 🏛️</h1>
         
-        <!-- Difficulty Selection -->
+        <!-- ============================================ -->
+        <!-- DIFFICULTY SELECTION SCREEN -->
+        <!-- First screen shown when game loads -->
+        <!-- ============================================ -->
         <div id="difficulty-selection">
             <h2>Select Difficulty</h2>
             <div class="button-group">
@@ -22,7 +30,11 @@
             <p id="home-high-score"></p>
         </div>
         
-        <!-- Category Selection -->
+        <!-- ============================================ -->
+        <!-- CATEGORY SELECTION SCREEN -->
+        <!-- Shown after difficulty selection -->
+        <!-- Allows filtering questions by historical period -->
+        <!-- ============================================ -->
         <div id="category-selection" style="display: none;">
             <h2>Select Historical Period</h2>
             <div class="button-group">
@@ -33,7 +45,11 @@
             </div>
         </div>
         
-        <!-- Character Selection -->
+        <!-- ============================================ -->
+        <!-- CHARACTER SELECTION SCREEN -->
+        <!-- Shown after category selection -->
+        <!-- Each character has unique abilities that affect gameplay -->
+        <!-- ============================================ -->
         <div id="character-selection" style="display: none;">
             <h2>Choose Your Hero</h2>
             <div class="character-grid">
@@ -65,14 +81,22 @@
             </div>
         </div>
         
-        <!-- Quest Intro -->
+        <!-- ============================================ -->
+        <!-- QUEST INTRODUCTION SCREEN -->
+        <!-- Shown after character selection -->
+        <!-- Displays character information and start button -->
+        <!-- ============================================ -->
         <div id="quest-intro" style="display: none;">
             <h2 id="storyline">Welcome, hero. Your quest begins!</h2>
             <p id="character-ability"></p>
             <button id="start-quest" class="primary-btn">Begin Quest</button>
         </div>
         
-        <!-- Game Stats -->
+        <!-- ============================================ -->
+        <!-- GAME STATISTICS DISPLAY -->
+        <!-- Shown during gameplay -->
+        <!-- Displays: Score, Lives, Streak, Level/Stage, Timer -->
+        <!-- ============================================ -->
         <div id="game-stats" style="display: none;">
             <div class="stat-item">
                 <span id="score">Score: 0</span>
@@ -91,7 +115,11 @@
             </div>
         </div>
         
-        <!-- Progress Bar -->
+        <!-- ============================================ -->
+        <!-- PROGRESS BAR -->
+        <!-- Visual indicator showing progress to next stage -->
+        <!-- Fills from 0/5 to 4/5, then resets when stage advances -->
+        <!-- ============================================ -->
         <div id="progress-container" style="display: none;">
             <div class="progress-bar-wrapper">
                 <div class="progress-bar-label">
@@ -104,7 +132,12 @@
             </div>
         </div>
         
-        <!-- Question Container -->
+        <!-- ============================================ -->
+        <!-- QUESTION CONTAINER -->
+        <!-- Main gameplay area -->
+        <!-- Displays: Category, Question, Answer buttons, Feedback -->
+        <!-- Answer buttons are dynamically generated in JavaScript -->
+        <!-- ============================================ -->
         <div id="question-container" style="display: none;">
             <p id="category" class="category-label"></p>
             <p id="question" class="question-text">Loading question...</p>
@@ -115,7 +148,12 @@
             <div id="explanation" class="explanation" style="display: none;"></div>
         </div>
         
-        <!-- Achievement Notification -->
+        <!-- ============================================ -->
+        <!-- ACHIEVEMENT POPUP NOTIFICATION -->
+        <!-- Appears when player unlocks an achievement -->
+        <!-- Animated popup with icon, title, and description -->
+        <!-- Auto-hides after 4 seconds -->
+        <!-- ============================================ -->
         <div id="achievement-popup" class="achievement-popup" style="display: none;">
             <div class="achievement-content">
                 <div class="achievement-icon">🏆</div>
@@ -124,7 +162,11 @@
             </div>
         </div>
         
-        <!-- Controls -->
+        <!-- ============================================ -->
+        <!-- POWER-UP CONTROLS -->
+        <!-- Strategic resources available during gameplay -->
+        <!-- Each power-up has limited uses and cooldown periods -->
+        <!-- ============================================ -->
         <div id="controls" style="display: none;">
             <h3>Power-Ups</h3>
             <div class="power-ups">
@@ -136,7 +178,11 @@
         </div>
     </div>
     
-    <!-- Game Over Screen -->
+    <!-- ============================================ -->
+    <!-- GAME OVER SCREEN -->
+    <!-- Shown when player runs out of lives -->
+    <!-- Displays final statistics and high score -->
+    <!-- ============================================ -->
     <div id="game-over" style="display: none;">
         <div class="game-over-content">
             <h2>🏺 Quest Complete! 🏺</h2>
@@ -149,6 +195,10 @@
         </div>
     </div>
     
+    <!-- ============================================ -->
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <!-- Contains all game functionality, state management, and question database -->
+    <!-- ============================================ -->
     <script src="game.js"></script>
 </body>
 </html>
